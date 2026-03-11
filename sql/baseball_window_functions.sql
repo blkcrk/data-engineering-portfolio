@@ -1,22 +1,40 @@
-# Data Engineering Portfolio
+-- Baseball Player Analysis
+-- Demonstrates SQL window functions using MLB batting data
+-- Data: Mike Trout, Aaron Judge, Mookie Betts (2019-2023)
 
-## About
-I am pursuing a role as a Data Engineer/Architect in the Phoenix, AZ area.
-This portfolio demonstrates hands-on experience with Python, SQL, Airflow,
-cloud data warehouses, and data pipelines.
+-- 1. Regional/Player Total Home Runs
+SELECT
+    playerID,
+    yearID,
+    HR,
+    SUM(HR) OVER (PARTITION BY playerID) AS career_hr
+FROM batting;
 
-## Tech Stack
-- **Languages**: Python, SQL
-- **Orchestration**: Apache Airflow
-- **Cloud Data Warehouse**: BigQuery
-- **Database**: DuckDB (local development)
-- **Version Control**: Git / GitHub
+-- 2. Top HR Season Per Player
+WITH ranked AS (
+    SELECT
+        playerID,
+        yearID,
+        HR,
+        ROW_NUMBER() OVER (PARTITION BY playerID ORDER BY HR DESC) AS rank
+    FROM batting
+)
+SELECT playerID, yearID, HR
+FROM ranked
+WHERE rank = 1;
 
-## Projects
-- **sql/** — Window functions, CTEs, and query optimization using baseball stats
-- **python-pipelines/** — Data ingestion and transformation scripts
-- **airflow/** — DAG examples for pipeline orchestration
-- **bigquery/** — Data modeling and cloud warehouse queries
+-- 3. Year-Over-Year HR Change
+SELECT
+    playerID,
+    yearID,
+    HR,
+    HR - LAG(HR) OVER (PARTITION BY playerID ORDER BY yearID) AS yoy_hr_change
+FROM batting;
 
-## Status
-🚧 Actively in progress — building toward Data Engineer/Architect roles in Phoenix, AZ
+-- 4.Year-Over-Year Batting Average Change
+SELECT
+    playerID,
+    yearID,
+    AVG,
+    ROUND(AVG - LAG(AVG) OVER (PARTITION BY playerID ORDER BY yearID), 3) AS yoy_avg_change
+FROM batting;
