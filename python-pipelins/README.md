@@ -1,2 +1,2 @@
-# SQL
-Window functions and query optimization examples
+# Python Pipelines
+Python pipeline examples
